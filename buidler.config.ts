@@ -1,5 +1,5 @@
 import { BuidlerConfig, usePlugin, internalTask } from "@nomiclabs/buidler/config";
-import { TASK_COMPILE_RUN_COMPILER } from "@nomiclabs/buidler/builtin-tasks/task-names";
+import { TASK_COMPILE_SOLIDITY_COMPILE } from "@nomiclabs/buidler/builtin-tasks/task-names";
 import { execSync } from "child_process";
 
 usePlugin("@nomiclabs/buidler-truffle5");
@@ -12,7 +12,7 @@ usePlugin("@nomiclabs/buidler-web3");
 const moduleAlias = require('module-alias');
 moduleAlias.addAlias('@utils', __dirname + '/utils');
 
-internalTask(TASK_COMPILE_RUN_COMPILER).setAction(async ({ input }, { config }, runSuper) => {
+internalTask(TASK_COMPILE_SOLIDITY_COMPILE).setAction(async ({ input }, { config }, runSuper) => {
   let solcVersionOutput = "";
   try {
     solcVersionOutput = execSync(`solc --version`).toString();
@@ -22,7 +22,7 @@ internalTask(TASK_COMPILE_RUN_COMPILER).setAction(async ({ input }, { config }, 
 
   console.log("Output", solcVersionOutput);
 
-  if (!solcVersionOutput.includes(config.solc.version)) {
+  if (!solcVersionOutput.includes(config.solidity.compilers[0].version)) {
     console.log(`Using solcjs`);
     return runSuper();
   }
@@ -36,13 +36,15 @@ internalTask(TASK_COMPILE_RUN_COMPILER).setAction(async ({ input }, { config }, 
 });
 
 const config: BuidlerConfig = {
-  solc: {
+  solidity: {
     version: "0.5.7",
-    optimizer: {
-      enabled: true,
-      runs: 200,
-    },
-    evmVersion: "byzantium",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+      evmVersion: "byzantium",
+    }
   },
   paths: {
     artifacts: "./build/contracts",
